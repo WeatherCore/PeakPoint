@@ -1,10 +1,10 @@
 <div align="center">
 
-# 🛎️ 黑马点评
+# 🛎️ PeakPoint 峰点
 
-**一个把 Redis 核心技术逐个落地的仿大众点评后端 —— 探店、秒杀、点赞、关注、Feed 流、签到、附近商铺，全部带并发难题的标准解法**
+**一个把 Redis 核心技术逐个落地的点评后端 —— 探店、秒杀、点赞、关注、Feed 流、签到、附近商铺，全部带并发难题的标准解法**
 
-*Redis in Action: a Dianping-style exploration backend where every hotspot has a named countermeasure*
+*PeakPoint: where every traffic peak meets a named countermeasure*
 
 [![Java](https://img.shields.io/badge/Java-1.8-007396?style=flat-square&logo=openjdk&logoColor=white)](https://www.java.com/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.3.12-6DB33F?style=flat-square&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
@@ -22,7 +22,9 @@
 
 ## 📦 项目简介
 
-**黑马点评（hm-dianping）** 是黑马程序员 Redis 实战课程的配套项目：一个仿大众点评的探店 App 后端。用户可以查店铺、发探店笔记、点赞、关注博主、抢优惠券秒杀、每日签到、按距离搜附近店铺。
+**PeakPoint（峰点）** 是一个仿大众点评的探店 App 后端。用户可以查店铺、发探店笔记、点赞、关注博主、抢优惠券秒杀、每日签到、按距离搜附近店铺。
+
+名字即主题：**Point** 是点评/地点（业务），**Peak** 是流量峰值（技术）——它的目标就是让每一个高并发峰值场景都有具名的、可跑的解法。
 
 它真正的价值不在"点评业务"本身，而在 **每一个高并发热点都有一个具名的、可跑的解法**：缓存穿透有"空值缓存"，缓存击穿有"逻辑过期+互斥锁重建"，秒杀超卖有"Lua 原子校验"，数据库被打爆有"RabbitMQ 异步削峰+死信兜底"，Feed 流有"推模式收件箱+滚动分页"，月度签到有"BitMap 位运算"……
 
@@ -211,7 +213,7 @@ mvn clean package -DskipTests
 
 # 方式一：IDE 直接跑 HmDianPingApplication#main
 # 方式二：命令行
-java -jar target/hm-dianping-0.0.1-SNAPSHOT.jar
+java -jar target/peakpoint-0.0.1-SNAPSHOT.jar
 ```
 
 启动成功标志：控制台打印 `秒杀优惠券缓存预热完成，共 N 个，实际写入 M 个`。
@@ -246,7 +248,7 @@ JMeter 对 `POST /voucher-order/seckill/{id}` 开 200 并发 / 100 库存：验�
 ## 📁 项目结构
 
 ```
-黑马点评/
+PeakPoint/
 ├── pom.xml                       # Maven 构建：Spring Boot 2.3.12 全家桶 + RabbitMQ + Redisson
 └── src/main/
     ├── resources/
