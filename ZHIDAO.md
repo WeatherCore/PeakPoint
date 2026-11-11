@@ -1,6 +1,6 @@
-# 📖 黑马点评（hm-dianping）项目导读指南
+# 📖 PeakPoint（峰点）项目导读指南
 
-> 本文件是 `黑马点评` 项目的中文导读，帮助你从零开始理解这个 **Redis 高并发实战后端** 的架构、代码和运行方式。
+> 本文件是 `PeakPoint` 项目的中文导读，帮助你从零开始理解这个 **Redis 高并发实战后端** 的架构、代码和运行方式。
 > 目标读者：第一次接触本项目的 Java 学习者 / 准备把它写进简历的求职者。
 
 ---
@@ -24,7 +24,7 @@
 
 ## 1. 这个项目是干什么的？
 
-**一句话总结**：黑马点评是一个模仿大众点评的探店 App 后端——用户可以查店铺、发探店笔记（Blog）、点赞、关注、抢优惠券秒杀、签到领积分；它是一个**专门为练习 Redis 高并发场景而生的单体 Spring Boot 项目**。
+**一句话总结**：PeakPoint 是一个点评类探店 App 后端——用户可以查店铺、发探店笔记（Blog）、点赞、关注、抢优惠券秒杀、签到领积分；它是一个**专门为练习 Redis 高并发场景而生的单体 Spring Boot 项目**。名字即主题：Point 是点评/地点（业务），Peak 是流量峰值（技术）。
 
 ```
 用户请求 → Spring Boot(8081)
@@ -119,7 +119,7 @@
 ## 3. 项目目录结构详解
 
 ```
-黑马点评/
+PeakPoint/
 ├── pom.xml                          # Maven 构建文件：Spring Boot 2.3.12 + MyBatis-Plus 3.4.3 + Redisson 3.13.6 + spring-boot-starter-amqp
 └── src/main/
     ├── resources/
@@ -377,7 +377,7 @@ ShopServiceImpl#queryById → CacheClient#queryWithLogicalExpire
 #### ⑬ `resources/seckill.lua`（39 行，约 15 分钟）
 
 - **文件作用**：秒杀资格的原子裁判——库存、一人一单、扣减、记名四步一气呵成。
-- **要点**：返回码契约：0=通过、1=库存不足、2=重复下单、-1=库存 key 不存在（预热失败）；第 37 行的 `xadd stream.orders` 是黑马原版（Redis Stream 方案）的残留，本项目走 RabbitMQ，这条指令会写一条没人消费的 Stream 消息（见第 10 章 Q3）。
+- **要点**：返回码契约：0=通过、1=库存不足、2=重复下单、-1=库存 key 不存在（预热失败）；第 37 行的 `xadd stream.orders` 是早期 Redis Stream 方案（v0 原型）的残留，本项目走 RabbitMQ，这条指令会写一条没人消费的 Stream 消息（见第 10 章 Q3）。
 
 ### 5.3 选读文件（理解主流程后按需读）
 
@@ -530,7 +530,7 @@ docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.8-managemen
 mvn clean package -DskipTests
 
 # 启动（方式一：命令行）
-java -jar target/hm-dianping-0.0.1-SNAPSHOT.jar
+java -jar target/peakpoint-0.0.1-SNAPSHOT.jar
 
 # 启动（方式二：IDE 里直接跑 HmDianPingApplication#main）
 ```
@@ -591,7 +591,7 @@ curl "http://localhost:8081/user/sign/count" -H "authorization: 上一步的toke
 
 | 资源 | 用途 |
 |---|---|
-| 黑马程序员 Redis 实战课（B 站免费） | 本项目的原始教学配套，遇到读不懂的设计去看对应课时 |
+| Redis 实战系列课程（B 站有大量公开课） | 本项目对应场景的教学视频，遇到读不懂的设计可搜索对应主题（关键词：Redis 秒杀/缓存/Feed 流） |
 | Redis 官方文档（redis.io） | SETBIT/BITFIELD/GEO/ZSET 命令细节 |
 | RabbitMQ 官方教程（TTL + Dead Letter） | 死信队列机制 |
 | MyBatis-Plus 官方文档 | BaseMapper/IService/条件构造器速查 |
@@ -614,7 +614,7 @@ A：Session 存在单台 Tomcat 内存里，多实例部署时用户在 A 登录
 A：它的职责不是拦人，是"顺便续期"。只要用户带着有效 token 刷了游客页面，会话也续 30 分钟；如果只让登录拦截器做这事，白名单路径就续不了。拆成两层是这个项目最值得学的工程细节之一。
 
 **Q3：`seckill.lua` 第 37 行的 `xadd stream.orders` 是干嘛的？为什么本项目没人消费它？**
-A：这是黑马原版方案的残留——原版用 Redis Stream 做消息队列，Java 侧有个线程轮询 `XREADGROUP`。本项目把消息队列换成了 RabbitMQ，但 Lua 里的 XADD 没删。**后果**：每次秒杀会往 `stream.orders` 写一条永远没人读的消息，Redis 内存缓慢增长；**处理建议**：学习时知晓即可，生产化时应删除该行（或删掉 RabbitMQ 用回 Stream，二选一）。`[注意]` 已在源码注释标注。
+A：这是早期 Redis Stream 方案（v0 原型）的残留——v0 用 Redis Stream 做消息队列，Java 侧有个线程轮询 `XREADGROUP`。本项目把消息队列换成了 RabbitMQ，但 Lua 里的 XADD 没删。**后果**：每次秒杀会往 `stream.orders` 写一条永远没人读的消息，Redis 内存缓慢增长；**处理建议**：学习时知晓即可，生产化时应删除该行（或删掉 RabbitMQ 用回 Stream，二选一）。`[注意]` 已在源码注释标注。
 
 **Q4：Lua 扣了 Redis 库存，但 MQ 消息发送失败/消费失败，库存岂不是少了？**
 A：是的，这是一个已知取舍点。原版用"事务消息/本地消息表"解；本项目的兜底是：发送失败直接抛异常（用户看到失败，不再继续）；消费端死信队列保证最终消费。更严格的做法是把"扣 Redis + 发 MQ"放进 Lua 或用 Redis Stream 事务消息——这正好可以作为你的"改进计划"在面试里讲。
